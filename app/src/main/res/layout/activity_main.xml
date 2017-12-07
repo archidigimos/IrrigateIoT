@@ -61,7 +61,7 @@
                 android:text="SELECT, THRESHOLD and SEND" />
 
             <com.jjoe64.graphview.GraphView
-                android:id="@+id/pop"
+                android:id="@+id/Resultant"
                 android:layout_width="300dip"
                 android:layout_marginLeft="39dp"
                 android:layout_marginBottom="39dp"
@@ -96,7 +96,7 @@
                 android:layout_height="200dip" />
 
             <com.jjoe64.graphview.GraphView
-                android:id="@+id/computed"
+                android:id="@+id/pop"
                 android:layout_width="300dip"
                 android:layout_marginLeft="39dp"
                 android:layout_marginBottom="39dp"

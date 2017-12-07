@@ -1,5 +1,6 @@
 package com.example.archismansarkar.iot;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -50,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private double threshold = 200.0;
     private double temp = 0.0;
 
+    SharedPreferences pref; // 0 - for private mode
+    public static final String hubAdS = "hubAdSt";
+    public static final String nodeAdS = "nodeAdSt";
+    public static final String controlDataS = "controlDataSt";
+    public static final String thresHoldS = "thresHoldSt";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
         humidityGraph.setTitleColor(Color.BLUE);
         humidityGraph.addSeries(humiditySeries);humidityGraph.getViewport().setXAxisBoundsManual(true);humidityGraph.getViewport().setMinX(0);humidityGraph.getViewport().setMaxX(100);humidityGraph.getViewport().setScalable(true);humidityGraph.getViewport().setScalableY(true);
 
-        GraphView computedGraph = (GraphView) findViewById(R.id.computed);
+        GraphView computedGraph = (GraphView) findViewById(R.id.Resultant);
         computedSeries = new LineGraphSeries<>();
-        computedGraph.setTitle("Computed");
+        computedGraph.setTitle("Resultant");
         computedGraph.setTitleColor(Color.RED);
         computedGraph.addSeries(computedSeries);computedGraph.getViewport().setXAxisBoundsManual(true);computedGraph.getViewport().setMinX(0);computedGraph.getViewport().setMaxX(100);computedGraph.getViewport().setScalable(true);computedGraph.getViewport().setScalableY(true);
 
@@ -95,6 +103,21 @@ public class MainActivity extends AppCompatActivity {
         nodeAd = (EditText) findViewById(R.id.nodeAddress);
         controlData = (EditText) findViewById(R.id.data);
         thresHold = (EditText) findViewById(R.id.threshold);
+
+        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+
+        if (pref.contains(hubAdS)) {
+            hubAd.setText(pref.getString(hubAdS, ""));
+        }
+        if (pref.contains(nodeAdS)) {
+            nodeAd.setText(pref.getString(nodeAdS, ""));
+        }
+        if (pref.contains(controlDataS)) {
+            controlData.setText(pref.getString(controlDataS, ""));
+        }
+        if (pref.contains(thresHoldS)) {
+            thresHold.setText(pref.getString(thresHoldS, ""));
+        }
 
         setOrsend = (Button) findViewById(R.id.setorsend);
         setOrsend.setOnClickListener(new View.OnClickListener() {
@@ -104,6 +127,15 @@ public class MainActivity extends AppCompatActivity {
                 dataControl = controlData.getText().toString();
                 thresholdSet = thresHold.getText().toString();
                 threshold = Double.parseDouble(thresholdSet);
+
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString(hubAdS,hubAddress);
+                editor.putString(nodeAdS,nodeAddress);
+                editor.putString(controlDataS,dataControl);
+                editor.putString(thresHoldS,thresholdSet);
+
+                editor.commit();
+
                 if(!(hubAddress.equals(""))){
                     if(!(nodeAddress.equals(""))){
 
