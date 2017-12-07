@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.archismansarkar.iot.MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <EditText
+                android:id="@+id/hubAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_marginLeft="39dp"
+                android:inputType="textPersonName"
+                android:text="Local Server" />
+
+            <EditText
+                android:id="@+id/nodeAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_marginLeft="39dp"
+                android:inputType="textPersonName"
+                android:text="Node" />
+
+
+            <EditText
+                android:id="@+id/data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_marginLeft="39dp"
+                android:inputType="textPersonName"
+                android:text="Command" />
+
+            <EditText
+                android:id="@+id/threshold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_marginBottom="39dp"
+                android:layout_marginLeft="39dp"
+                android:inputType="textPersonName"
+                android:text="Threshold" />
+
+            <Button
+                android:id="@+id/setorsend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="39dp"
+                android:layout_marginLeft="39dp"
+                android:text="SELECT, THRESHOLD and SEND" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/pop"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/flow"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/temperature"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/moisture"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/humidity"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/computed"
+                android:layout_width="300dip"
+                android:layout_marginLeft="39dp"
+                android:layout_marginBottom="39dp"
+                android:layout_height="200dip" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</android.support.constraint.ConstraintLayout>
