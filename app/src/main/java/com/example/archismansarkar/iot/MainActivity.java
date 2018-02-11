@@ -40,9 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
     private double graphLastXValue = 0d;
 
-    private EditText hubAd, nodeAd, controlData, thresHold;
+    private EditText cloudAd, hubAd, nodeAd, controlData, thresHold;
     private Button setOrsend;
 
+    private String cloudAddress = "";
     private String hubAddress = "";
     private String nodeAddress = "";
     private String dataControl = "";
@@ -52,11 +53,16 @@ public class MainActivity extends AppCompatActivity {
     private double temp = 0.0;
 
     SharedPreferences pref; // 0 - for private mode
+    public static final String cloudAdS = "cloudAdSt";
     public static final String hubAdS = "hubAdSt";
     public static final String nodeAdS = "nodeAdSt";
     public static final String controlDataS = "controlDataSt";
     public static final String thresHoldS = "thresHoldSt";
+    private Boolean exit = false;
+    private Boolean thread_Start = false;
 
+    private Handler handler = new Handler();
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,13 +105,23 @@ public class MainActivity extends AppCompatActivity {
         computedGraph.setTitleColor(Color.RED);
         computedGraph.addSeries(computedSeries);computedGraph.getViewport().setXAxisBoundsManual(true);computedGraph.getViewport().setMinX(0);computedGraph.getViewport().setMaxX(100);computedGraph.getViewport().setScalable(true);computedGraph.getViewport().setScalableY(true);
 
+        cloudAd = (EditText) findViewById(R.id.cloudAddress);
         hubAd = (EditText) findViewById(R.id.hubAddress);
         nodeAd = (EditText) findViewById(R.id.nodeAddress);
         controlData = (EditText) findViewById(R.id.data);
         thresHold = (EditText) findViewById(R.id.threshold);
 
+        setOrsend = (Button) findViewById(R.id.scrd);
+        //setOrsend.setText("Connect");
+        //setOrsend.setTextColor(Color.WHITE);
+        //setOrsend.setBackgroundColor(Color.RED);
+
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
 
+        if (pref.contains(cloudAdS)) {
+            cloudAd.setText(pref.getString(cloudAdS, ""));
+            connectToServer(pref.getString(cloudAdS, "10.124.195.9:9001"),setOrsend);
+        }
         if (pref.contains(hubAdS)) {
             hubAd.setText(pref.getString(hubAdS, ""));
         }
@@ -119,9 +135,9 @@ public class MainActivity extends AppCompatActivity {
             thresHold.setText(pref.getString(thresHoldS, ""));
         }
 
-        setOrsend = (Button) findViewById(R.id.setorsend);
         setOrsend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                cloudAddress = cloudAd.getText().toString();
                 hubAddress = hubAd.getText().toString();
                 nodeAddress = nodeAd.getText().toString();
                 dataControl = controlData.getText().toString();
@@ -129,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 threshold = Double.parseDouble(thresholdSet);
 
                 SharedPreferences.Editor editor = pref.edit();
+                editor.putString(cloudAdS,cloudAddress);
                 editor.putString(hubAdS,hubAddress);
                 editor.putString(nodeAdS,nodeAddress);
                 editor.putString(controlDataS,dataControl);
@@ -136,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
                 editor.commit();
 
+                connectToServer(cloudAddress,setOrsend);
                 if(!(hubAddress.equals(""))){
                     if(!(nodeAddress.equals(""))){
 
@@ -153,11 +171,29 @@ public class MainActivity extends AppCompatActivity {
                     Toast msgHub = Toast.makeText(getBaseContext(),"Please enter a valid Hub address!!!",Toast.LENGTH_LONG);
                     msgHub.show();
                 }
-
             }
         });
+    }
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            handler.removeCallbacks(runnable);
+            mConnection.disconnect();
+            finish();
+            System.exit(0);
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }
+            }, 3 * 1000);
 
-        connectToServer();
+        }
+
     }
     public double computeData(double[] arr, int index){
         int length = arr.length;
@@ -165,18 +201,48 @@ public class MainActivity extends AppCompatActivity {
         else return arr[index]+computeData(arr,index+1);
     }
 
-    public void connectToServer() {
+    public void connectToServer(final String wsuri,final Button b) {
 
-        final String wsuri = "ws://52.14.147.118:9001";
-        //final String wsuri = "ws://11.0.0.9:9001";
-
+        String cloudAddressLink = "ws://";
+        cloudAddressLink = cloudAddressLink + wsuri;
+        if(!webSocketConnected) {
+            b.setText("Connecting...");
+            b.setBackgroundColor(Color.WHITE);
+            b.setTextColor(Color.RED);
+            Toast msgNode = Toast.makeText(getBaseContext(),"Connecting to cloud Server",Toast.LENGTH_LONG);
+            msgNode.show();
+            runnable = new Runnable() {
+                public void run() {
+                    Toast msgNode = Toast.makeText(getBaseContext(),"Unable to connect the Cloud Server. Check cloud address and retry",Toast.LENGTH_LONG);
+                    msgNode.show();
+                    if(thread_Start==true) {
+                        b.setText("Connect");
+                        b.setTextColor(Color.WHITE);
+                        b.setBackgroundColor(Color.RED);
+                        thread_Start=false;
+                        handler.removeCallbacks(runnable);
+                    }
+                    else {
+                        thread_Start = true;
+                        handler.postDelayed(this, 5000);
+                    }
+                }
+            };
+            runnable.run();
+        }
         try {
-            mConnection.connect(wsuri, new WebSocketConnectionHandler() {
+            mConnection.connect(cloudAddressLink, new WebSocketConnectionHandler() {
 
                 @Override
                 public void onOpen() {
+                    Toast msgNode = Toast.makeText(getBaseContext(),"Connected succesfully to Cloud Server",Toast.LENGTH_LONG);
+                    msgNode.show();
                     webSocketConnected = true;
                     mConnection.sendTextMessage("ADMIN");
+                    handler.removeCallbacks(runnable);
+                    b.setText("Send Command / Receive Data");
+                    b.setTextColor(Color.WHITE);
+                    b.setBackgroundColor(Color.BLUE);
                 }
 
                 @Override
@@ -214,7 +280,12 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onClose(int code, String reason) {
+                    Toast msgNode = Toast.makeText(getBaseContext(),"Connection to the Cloud Server has been closed",Toast.LENGTH_LONG);
+                    msgNode.show();
                     webSocketConnected = false;
+                    b.setText("Connect");
+                    b.setTextColor(Color.WHITE);
+                    b.setBackgroundColor(Color.RED);
                 }
             });
         } catch (WebSocketException e) {
